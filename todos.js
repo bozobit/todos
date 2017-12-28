@@ -12,7 +12,9 @@ Router.route('/', {
     name: 'home',
     template: 'home'
 });
+
 Router.route('/register');
+
 Router.route('/login');
 
 Router.route('/list/:_id', {
