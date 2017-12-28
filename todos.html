@@ -1,16 +1,40 @@
-<!-- HEAD AND BODY -->
-<head>
-    <title>Todos</title>
-</head>
-<body>
-    {{> todos}}
-</body>
-
 <!-- TEMPLATES -->
 
+<!-- Templates for main screens and navigation -->
+<template name="main">
+    <h1>Todos 2017</h1>
+    {{> navigation}}
+    {{> lists}}
+    {{> yield}}
+    <hr />
+    <p>Copyright &copy; Todos, 2017.</p>
+</template>
+
+<template name="navigation">
+        <ul>
+            <li><a href="{{pathFor route='home'}}">Home</a></li>
+            <li><a href="{{pathFor route='register'}}">Register</a></li>
+            <li><a href="{{pathFor route='login'}}">Login</a></li>
+        </ul>
+    </template>
+
+<template name="home">
+    <p>Welcome to the Todos application.</p>
+</template>
+
+<template name="register">
+    <h2>Register</h2>
+</template>
+    
+<template name="login">
+    <h2>Login</h2>
+</template>
+    
+<!-- Templates for todo lists and items -->
+
 <template name = "todos">
+    {{> addTodo}}
     <ul>
-        {{> addTodo}}
         {{#each todo}}
             {{> todoItem}}
         {{/each}}
@@ -39,5 +63,29 @@
         <p>You have completed {{completedTodos}} out of {{totalTodos}} tasks.</p>
     {{/if}}
 
+</template>
+
+<!-- Templates for lists -->
+
+
+<template name="lists">
+    <h2>Lists</h2>
+    {{> addList}}
+    <ul>
+        {{#each list}}
+        <li><a href="{{pathFor route='listPage'}}">{{name}}</a></li>
+        {{/each}}
+    </ul>
+</template>
+
+<template name="addList">
+    <form>Create a list:
+        <input type="text" placeholder="List name here..." name="listName">
+    </form>
+</template>
+
+<template name="listPage">
+    <h2>{{name}} Tasks</h2>
+    {{> todos}}
 </template>
     

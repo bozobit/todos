@@ -1,6 +1,28 @@
 //GLOBAL VARIABLES
-Todos = new Mongo.Collection('todos');
+Todos = new Meteor.Collection('todos');
+Lists = new Meteor.Collection('lists'); 
 
+//ROUTES
+
+Router.configure({
+    layoutTemplate: 'main'
+});
+
+Router.route('/', {
+    name: 'home',
+    template: 'home'
+});
+Router.route('/register');
+Router.route('/login');
+
+Router.route('/list/:_id', {
+    name: 'listPage',
+    template: 'listPage',
+    data: function(){
+        var currentList = this.params._id;
+        return Lists.findOne({ _id: currentList });
+    }
+});
 
 //METHODS
 
@@ -11,16 +33,16 @@ if(Meteor.isClient){
     //SUBSCRIBING DATA
 
     //HELPER FUNCTIONS
+
+    //Helpers for todos and todo items
     Template.todos.helpers({
-
         'todo': function(){
-            return Todos.find({}, {sort: {createdAt: -1}});
+            var currentList = this._id;
+            return Todos.find({listId: currentList}, {sort: {createdAt: -1}});
         }
-
     })
 
     Template.todoItem.helpers({
-
         'checked': function(){
             var isCompleted = this.completed
             if(isCompleted){
@@ -29,20 +51,26 @@ if(Meteor.isClient){
                 return "";
             }
         }
-
     })
 
     Template.todosCount.helpers({
-
         'totalTodos': function(){
-            return Todos.find().count();
+            var currentList = this._id;
+            return Todos.find({listId: currentList}).count();
         },
-
         'completedTodos': function(){
-            return Todos.find({completed: true}).count();
+            var currentList = this._id;
+            return Todos.find({listId: currentList, completed: true}).count();
         }
-
     })
+
+    // Helpers for lists and list items    
+    Template.lists.helpers({
+        'list': function(){
+            return Lists.find({}, {sort: {name: 1}});
+        }
+    });
+
 
 
     //CLIENT EVENTS
@@ -51,11 +79,12 @@ if(Meteor.isClient){
         'submit form': function(event){
             event.preventDefault();
             var todoName = $('[name="todoName"]').val();
-            console.log(todoName)
+            var currentList = this._id;
             Todos.insert({
                 name: todoName,
                 completed: false,
-                createdAt: new Date()
+                createdAt: new Date(),
+                listId: currentList
             })
             $('[name="todoName"]').val('');
         }
@@ -97,12 +126,29 @@ if(Meteor.isClient){
 
     })
 
+    Template.addList.events({
+
+        'submit form': function(event){
+        event.preventDefault();
+        var listName = $('[name=listName]').val();
+        Lists.insert({
+            name: listName
+            }, function(error, results) {
+                Router.go('listPage', { _id: results });
+            }
+        );
+        $('[name=listName]').val('');
+        }
+
+    });
 
 
-}
+}  //END CLIENT CODE
 
 
 //SERVER CODE
 if(Meteor.isServer){
     // server code goes here
-}
+
+
+}  //END SERVER CODE
