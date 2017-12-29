@@ -13,8 +13,12 @@
 <template name="navigation">
         <ul>
             <li><a href="{{pathFor route='home'}}">Home</a></li>
-            <li><a href="{{pathFor route='register'}}">Register</a></li>
-            <li><a href="{{pathFor route='login'}}">Login</a></li>
+            {{#if currentUser}}
+                <li><a href="#" class="logout">Logout</a></li>
+            {{else}}
+                <li><a href="{{pathFor route='register'}}">Register</a></li>
+                <li><a href="{{pathFor route='login'}}">Login</a></li>
+            {{/if}}
         </ul>
     </template>
 
@@ -22,12 +26,24 @@
     <p>Welcome to the Todos application.</p>
 </template>
 
+<!-- Templates registration and login -->
+
 <template name="register">
     <h2>Register</h2>
+    <form class="register">
+        <p>Email: <input type="email" name="email"></p>
+        <p>Password: <input type="password" name="password"></p>
+        <p><input type="submit" value="Register"></p>
+    </form>
 </template>
     
 <template name="login">
     <h2>Login</h2>
+    <form class="login">
+        <p>Email: <input type="email" name="email"></p>
+        <p>Password: <input type="password" name="password"></p>
+        <p><input type="submit" value="Login"></p>
+    </form>
 </template>
     
 <!-- Templates for todo lists and items -->
@@ -88,15 +104,3 @@
     <h2>{{name}} Tasks</h2>
     {{> todos}}
 </template>
-
-<!-- Templates for user registration -->
-
-<template name="register">
-    <h2>Register</h2>
-    <form class="register">
-        <p>Email: <input type="email" name="email"></p>
-        <p>Password: <input type="password" name="password"></p>
-        <p><input type="submit" value="Register"></p>
-    </form>
-</template>
-    
