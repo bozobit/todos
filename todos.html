@@ -4,7 +4,9 @@
 <template name="main">
     <h1>Todos 2018 v2</h1>
     {{> navigation}}
-    {{> lists}}
+    {{#if currentUser}}
+        {{> lists}}
+    {{/if}}
     {{> yield}}
     <hr />
     <p>Copyright &copy; Todos, 2017.</p>
@@ -74,15 +76,12 @@
 </template>
 
 <template name = "todosCount">
-
     {{#if totalTodos}}
         <p>You have completed {{completedTodos}} out of {{totalTodos}} tasks.</p>
     {{/if}}
-
 </template>
 
 <!-- Templates for lists -->
-
 
 <template name="lists">
     <h2>Lists</h2>
