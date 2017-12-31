@@ -33,8 +33,8 @@
 <template name="register">
     <h2>Register</h2>
     <form class="register">
-        <p>Email: <input type="email" name="email"></p>
-        <p>Password: <input type="password" name="password"></p>
+        <p>Email: <input type="email" name="email" required></p>
+        <p>Password: <input type="password" name="password" required></p>
         <p><input type="submit" value="Register"></p>
     </form>
 </template>
@@ -42,8 +42,8 @@
 <template name="login">
     <h2>Login</h2>
     <form class="login">
-        <p>Email: <input type="email" name="email"></p>
-        <p>Password: <input type="password" name="password"></p>
+        <p>Email: <input type="email" name="email" required></p>
+        <p>Password: <input type="password" name="password" required></p>
         <p><input type="submit" value="Login"></p>
     </form>
 </template>
@@ -84,7 +84,7 @@
 <!-- Templates for lists -->
 
 <template name="lists">
-    <h2>Lists</h2>
+    <h2>Lists for {{userId}}</h2>
     {{> addList}}
     <ul>
         {{#each list}}

@@ -95,6 +95,11 @@ if(Meteor.isClient){
         'list': function(){
             var currentUser = Meteor.userId();
             return Lists.find({createdBy: currentUser}, {sort: {name: 1}});
+        },
+
+        'userId' : function(){
+            var currentUser = Meteor.userId();
+            return currentUser;
         }
     });
 
@@ -155,6 +160,7 @@ if(Meteor.isClient){
 
     })
 
+
     Template.addList.events({
 
         'submit form': function(event){
@@ -176,37 +182,96 @@ if(Meteor.isClient){
     Template.register.events({
         'submit form': function(event){
             event.preventDefault();
-            var email = $('[name=email]').val();
-            var password = $('[name=password]').val();
-            Accounts.createUser({
-                email: email,
-                password: password},
-                function(error){
-                    if(error){
-                        console.log(error.reason); // Output error if registration fails
-                    } else {
-                        Router.go("home"); // Redirect user if registration succeeds
-                    }
-                }
-            );
         }
     });
+
+    Template.register.onRendered(function(){
+        var validator = $('.register').validate({
+            submitHandler: function(event){
+                var email = $('[name=email]').val();
+                var password = $('[name=password]').val();
+                Accounts.createUser({
+                    email: email,
+                    password: password
+                }, function(error){
+                    if(error){
+                        if(error.reason == "Email already exists."){
+                            validator.showErrors({
+                                email: "That email already belongs to a registered user."   
+                            });
+                        }
+                    } else {
+                        Router.go("home");
+                    }
+                });
+            }    
+        });
+    });
+
 
     Template.login.events({
         'submit form': function(event){
             event.preventDefault();
-            var email = $('[name=email]').val();
-            var password = $('[name=password]').val();
-            Meteor.loginWithPassword(email, password, function(error){
-                if(error){
-                    console.log(error.reason);
-                } else {
-                    var currentRoute = Router.current().route.getName();
-                    if(currentRoute == "login"){
-                        Router.go("home");
+        }
+    });
+
+    Template.login.onCreated(function(){
+        console.log("The 'login' template was just created.");
+    });
+    
+    Template.login.onRendered(function(){
+        var validator = $('.login').validate({
+            submitHandler: function(event){
+                var email = $('[name=email]').val();
+                var password = $('[name=password]').val();
+                Meteor.loginWithPassword(email, password, function(error){
+                    if(error){
+                        if(error.reason == "User not found"){
+                            validator.showErrors({
+                                email: "That email doesn't belong to a registered user."   
+                            });
+                        }
+                        if(error.reason == "Incorrect password"){
+                            validator.showErrors({
+                                password: "You entered an incorrect password."    
+                            });
+                        }
+                    } else {
+                        var currentRoute = Router.current().route.getName();
+                        if(currentRoute == "login"){
+                            Router.go("home");
+                        }
                     }
-                }
-            });
+                });
+            }
+        });
+    });
+    
+    Template.login.onDestroyed(function(){
+        console.log("The 'login' template was just destroyed.");
+    });
+
+    //Common validation for login and registration.
+    $.validator.setDefaults({
+        rules: {
+            email: {
+                required: true,
+                email: true
+            },
+            password: {
+                required: true,
+                minlength: 6
+            }
+        },
+        messages: {
+            email: {
+                required: "You must enter an email address.",
+                email: "You've entered an invalid email address."
+            },
+            password: {
+                required: "You must enter a password.",
+                minlength: "Your password must be at least {0} characters."
+            }
         }
     });
 
@@ -226,5 +291,33 @@ if(Meteor.isClient){
 if(Meteor.isServer){
     // server code goes here
 
+    class Animal {
+
+        constructor(name) {
+          this.speed = 0;
+          this.name = name;
+        }
+      
+        run(speed) {
+          this.speed += speed;
+          alert(`${this.name} runs with speed ${this.speed}.`);
+        }
+      
+        stop() {
+          this.speed = 0;
+          alert(`${this.name} stopped.`);
+        }
+      
+      }
+      
+      // Inherit from Animal
+      class Rabbit extends Animal {
+        hide() {
+          alert(`${this.name} hides!`);
+        }
+      }
+
 
 }  //END SERVER CODE
+
+
