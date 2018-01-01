@@ -5,12 +5,15 @@ Lists = new Meteor.Collection('lists');
 //ROUTES
 
 Router.configure({
-    layoutTemplate: 'main'
+    layoutTemplate: 'main',
+    loadingTemplate: 'loading' 
 });
 
 Router.route('/', {
     name: 'home',
-    template: 'home'
+    template: 'home',
+
+
 });
 
 Router.route('/register');
@@ -25,15 +28,7 @@ Router.route('/list/:_id', {
         var currentUser = Meteor.userId();
         return Lists.findOne({ _id: currentList, createdBy: currentUser });
     },
-    onRun: function(){
-        console.log("You triggered 'onRun' for 'listPage' route.");
-        this.next();
-    },
-    onRerun: function(){
-        console.log("You triggered 'onRerun' for 'listPage' route.");
-    },
     onBeforeAction: function(){
-        console.log("You triggered 'onBeforeAction' for 'listPage' route.");
         var currentUser = Meteor.userId();
         if(currentUser){
             this.next();
@@ -41,11 +36,9 @@ Router.route('/list/:_id', {
             this.render("login");
         }
     },
-    onAfterAction: function(){
-        console.log("You triggered 'onAfterAction' for 'listPage' route.");
-    },
-    onStop: function(){
-        console.log("You triggered 'onStop' for 'listPage' route.");
+    waitOn: function(){
+        var currentList = this.params._id;
+        return Meteor.subscribe('todos', currentList);
     }
 });
 
@@ -55,7 +48,8 @@ Router.route('/list/:_id', {
 //CLIENT CODE
 if(Meteor.isClient){
     
-    //SUBSCRIBING DATA
+    //SUBSCRIBING DATA (Moved to routes per Chapter 9)
+
 
     //HELPER FUNCTIONS
 
@@ -104,6 +98,10 @@ if(Meteor.isClient){
 
     });
 
+    // Subscription for lists (Chapter 9 - Allows for more modular lists)
+    Template.lists.onCreated(function () {
+        this.subscribe('lists');
+    });
 
 
     //CLIENT EVENTS
@@ -292,31 +290,22 @@ if(Meteor.isClient){
 if(Meteor.isServer){
     // server code goes here
 
-    class Animal {
+    //Publish only those list item for the current user. 
+    Meteor.publish('lists', function(){
+        var currentUser = this.userId;
+        return Lists.find({ createdBy: currentUser });
+    });
 
-        constructor(name) {
-          this.speed = 0;
-          this.name = name;
-        }
-      
-        run(speed) {
-          this.speed += speed;
-          alert(`${this.name} runs with speed ${this.speed}.`);
-        }
-      
-        stop() {
-          this.speed = 0;
-          alert(`${this.name} stopped.`);
-        }
-      
-      }
-      
-      // Inherit from Animal
-      class Rabbit extends Animal {
-        hide() {
-          alert(`${this.name} hides!`);
-        }
-      }
+    //Publish only those todo items for the current user. 
+    Meteor.publish('todos', function(currentList){
+        var currentUser = this.userId;
+        return Todos.find({ createdBy: currentUser, listId: currentList })
+    });
+
+
+
+
+
 
 
 }  //END SERVER CODE
