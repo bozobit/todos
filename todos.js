@@ -101,6 +101,7 @@ if(Meteor.isClient){
             var currentUser = Meteor.userId();
             return currentUser;
         }
+
     });
 
 
