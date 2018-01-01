@@ -111,15 +111,13 @@ if(Meteor.isClient){
             event.preventDefault();
             var todoName = $('[name="todoName"]').val();
             var currentList = this._id;
-            var currentUser = Meteor.userId();
-            Todos.insert({
-                name: todoName,
-                completed: false,
-                createdAt: new Date(),
-                createdBy: currentUser,
-                listId: currentList
-            })
-            $('[name="todoName"]').val('');
+            Meteor.call('createListItem', todoName, currentList, function(error){
+                if(error){
+                    console.log(error.reason);
+                } else {
+                    $('[name="todoName"]').val('');
+                }
+            });
         }
 
     })
@@ -174,20 +172,6 @@ if(Meteor.isClient){
             });
         }
     });
-
-
-        // var currentUser = Meteor.userId();
-        // Lists.insert({
-        //     name: listName,
-        //     createdBy: currentUser
-        //     }, function(error, results) {
-        //         Router.go('listPage', { _id: results });
-        //     }
-        // );
-        // $('[name=listName]').val('');
-        // }
-
-    // });
 
     Template.register.events({
         'submit form': function(event){
@@ -299,10 +283,6 @@ if(Meteor.isClient){
 
 //SERVER CODE
 if(Meteor.isServer){
-    
-    
-    
-    // PUBLISH
 
     //Publish only those list item for the current user. 
     Meteor.publish('lists', function(){
@@ -316,41 +296,56 @@ if(Meteor.isServer){
         return Todos.find({ createdBy: currentUser, listId: currentList })
     });
 
-    //METHODS
-
-    Meteor.methods({
-        'createNewList': function(listName){
-            var currentUser = this.userId;
-            if(listName == ""){
-                listName = defaultName(currentUser);
-            }
-            var currentUser = Meteor.userId();
-            check(listName, String); 
-            var data = {
-                name: listName,
-                createdBy: currentUser
-            }
-            if(!currentUser){
-                throw new Meteor.Error("not-logged-in", "You're not logged-in.");
-            }
-            return Lists.insert(data);
-        }
-    });
-
-
-    function defaultName(currentUser) {
-        var nextLetter = 'A'
-        var nextName = 'List ' + nextLetter;
-        while (Lists.findOne({ name: nextName, createdBy: currentUser })) {
-            nextLetter = String.fromCharCode(nextLetter.charCodeAt(0) + 1);
-            nextName = 'List ' + nextLetter;
-        }
-        return nextName;
-    }
-
-
-
-
 }  //END SERVER CODE
 
 
+//METHODS
+
+Meteor.methods({
+
+    'createNewList': function(listName){
+        check(listName, String); 
+        var currentUser = Meteor.userId();
+        if(!currentUser){
+            throw new Meteor.Error("not-logged-in", "You're not logged-in.");
+        }
+        if(listName == ""){
+            listName = defaultName(currentUser);
+        }
+        var data = {
+            name: listName,
+            createdBy: currentUser
+        }
+        return Lists.insert(data);
+    },
+
+    'createListItem': function(todoName, currentList){
+        check(todoName, String);
+        check(currentList, String);
+        var currentUser = Meteor.userId();
+        if(!currentUser){
+            throw new Meteor.Error("not-logged-in", "You're not logged-in.");
+        }
+        var data = {
+            name: todoName,
+            completed: false,
+            createdAt: new Date(),
+            createdBy: currentUser,
+            listId: currentList
+        }
+        return Todos.insert(data);
+    }
+
+});
+
+// UTILITY FUNCTIONS
+
+function defaultName(currentUser) {
+    var nextLetter = 'A'
+    var nextName = 'List ' + nextLetter;
+    while (Lists.findOne({ name: nextName, createdBy: currentUser })) {
+        nextLetter = String.fromCharCode(nextLetter.charCodeAt(0) + 1);
+        nextName = 'List ' + nextLetter;
+    }
+    return nextName;
+}
